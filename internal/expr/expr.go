@@ -161,7 +161,9 @@ func (n *binaryNode) eval(vars map[string]float64) (float64, error) {
 		if rv == 0 {
 			return 0, fmt.Errorf("%w: %g %% %g", ErrModuloByZero, lv, rv)
 		}
-		return checkFinite(math.Remainder(lv, rv))
+		// 截断取模：a - b*trunc(a/b)，结果符号同被除数（与 math.Remainder
+		// 的就近偶数取整不同，后者会使 -5 % 3 = 1 而非 -2）。
+		return checkFinite(lv - rv*math.Trunc(lv/rv))
 	case "^":
 		return powImpl(lv, rv)
 	case "==":
